@@ -1,0 +1,115 @@
+﻿@using WebApplication1.Enum;
+@model WebApplication1.VM.VMPatient;
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <div class="row">
+        <label class="col-md-3">Patient Name</label>
+        <input class="col-md-9" type="text" id="patientName" />
+    </div>
+    <div>
+        <label class="col-md-3">Disease Name</label>
+        <select id="diseaseDrop">
+            <option disabled selected value="0"></option>
+            @foreach (var disease in ViewBag.DiseaseInfo)
+            {
+                <option value="@disease.Id">@disease.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="col-md-3">Epilepsy</label>
+        <select id="elilapsyDrop">
+            @foreach (var epilepsy in ViewBag.Epilepsy)
+            {
+                <option value="@epilepsy.Value">@epilepsy.Text</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="col-md-3">Other NCDs</label>
+        <select id="ncdList" multiple>
+            @foreach (var ncd in ViewBag.NCD)
+            {
+                <option value="@ncd.Id">@ncd.Name</option>
+            }
+        </select>
+
+        <button id="addncdButton">Add</button>
+        <button id="removencdButton">Remove</button>
+
+        <select id="selectedncdList" multiple></select>
+    </div>
+    <div>
+        <label class="col-md-3">Allergies</label>
+        <select id="allergyList" multiple>
+            @foreach (var allergy in ViewBag.Allergies)
+            {
+                <option value="@allergy.Id">@allergy.Name</option>
+            }
+        </select>
+
+        <button id="addAllergyButton">Add</button>
+        <button id="removeAllergyButton">Remove</button>
+
+        <select id="selectedAllergyList" multiple></select>
+    </div>
+    <button id="saveButton">Save</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#addncdButton').click(function() {
+            $('#ncdList option:selected').appendTo('#selectedncdList');
+        });
+
+        $('#removencdButton').click(function() {
+            $('#selectedncdList option:selected').appendTo('#ncdList');
+        });
+
+        $('#addAllergyButton').click(function() {
+            $('#allergyList option:selected').appendTo('#selectedAllergyList');
+        });
+
+        $('#removeAllergyButton').click(function() {
+            $('#selectedAllergyList option:selected').appendTo('#allergyList');
+        });
+
+        $('#saveButton').click(function () {
+            
+            var patientinfo = {
+                Name: $('#patientName').val(),
+                DeseaseId: $('#diseaseDrop').val(),
+                Epilepsy: $('#elilapsyDrop').val()
+            }
+
+            var selectedNcd = $('#selectedncdList').val();
+            var selectedAllergy = $('#selectedAllergyList').val();
+
+            $.ajax({
+                url: '/Patient/SavePatientInfo',
+                type: 'POST',
+                dataType: 'json',
+                data: { patientInformation: patientinfo, nCD_Details: selectedNcd, allergies_Details: selectedAllergy },
+                success: function (data) {
+                    clearPage();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error('Error retrieving inventory data:', errorThrown);
+                }
+            });
+        });
+
+        function clearPage(){
+            $('#patientName').val('');
+            $('#diseaseDrop').val('0');
+            $('#elilapsyDrop').val('0');
+            $('#selectedncdList').empty();
+            $('#selectedAllergyList').empty();
+        }
+    });
+</script>
